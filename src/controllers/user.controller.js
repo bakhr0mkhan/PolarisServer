@@ -3,18 +3,19 @@ const User = db.users;
 const Op = db.Sequelize.Op;
 
 exports.create = async (req, res) => {
+  const { name, lastname, email, phoneNumber, password } = req.body;
   // Validate request
-  if (!req.body.name || !req.body.phoneNumber || !req.body.password) {
+  if (!name || !phoneNumber || !password) {
     res.status(400).json({
       message: "No details provided",
     });
   }
   const user = {
-    name: req.body.name,
-    lastname: req.body.lastname,
-    email: req.body.email,
-    phoneNumber: req.body.phoneNumber,
-    password: req.body.password,
+    name,
+    lastname,
+    email,
+    phoneNumber,
+    password,
   };
   try {
     let saved = await User.create(user);
@@ -31,6 +32,7 @@ exports.create = async (req, res) => {
 exports.findAll = async (req, res) => {
   try {
     const users = await User.findAll();
+    if (!users.length) return res.status(404).json({ msg: "Users not found" });
     return res.status(200).json({ users });
   } catch (err) {
     console.log(err);
@@ -39,11 +41,13 @@ exports.findAll = async (req, res) => {
 };
 
 exports.findOne = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.query;
+  console.log("THIS IS QUERY", req.query);
   if (!id)
     return res.status(400).json({ msg: "Bad Request: User id not provided" });
   try {
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(Number(id));
+    if (!user) return res.status(404).json({ msg: "User not found" });
     return res.status(200).json({ user });
   } catch (err) {
     console.log(err);
@@ -52,7 +56,7 @@ exports.findOne = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  const id = req.params.id;
+  const { id } = req.query;
 
   await User.update(req.body, {
     where: { id },
@@ -88,7 +92,7 @@ exports.destroyAll = async (req, res) => {
 };
 
 exports.destroy = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.query;
   if (id) {
     try {
       const user = await User.findByPk(id);

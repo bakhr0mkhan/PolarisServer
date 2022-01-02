@@ -30,7 +30,6 @@ db.sequelize.sync({ force: true }).then(() => {
   console.log("Drop and re-sync db.");
 });
 */
-
 require("./src/routes/user.routes")(app);
 
 // set port, listen for requests
