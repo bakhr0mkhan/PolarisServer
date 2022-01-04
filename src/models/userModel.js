@@ -1,3 +1,5 @@
+const db = require("./index");
+
 const bcryptService = require("../services/bcrypt.service");
 
 const hooks = {
