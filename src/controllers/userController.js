@@ -1,9 +1,10 @@
 const db = require("../models");
 const User = db.users;
 const Op = db.Sequelize.Op;
+const authService = require("../services/auth.service");
 
 const userController = () => {
-  const create = async (req, res) => {
+  const register = async (req, res) => {
     const { name, lastname, email, phoneNumber, password } = req.body;
     // Validate request
     if (!name || !phoneNumber || !password) {
@@ -13,8 +14,15 @@ const userController = () => {
     }
     try {
       let saved = await User.create(req.body);
-      if (saved) res.status(200).json(saved);
-      else res.status(500).json({ msg: "Error creating user" });
+      if (saved) {
+        let token = authService().issue({
+          id: saved?.id,
+          name: saved?.name,
+          phoneNumber: saved?.phoneNumber,
+        });
+        console.log("THIS IS A TOKEN", token);
+        return res.status(200).json(saved);
+      } else res.status(500).json({ msg: "Error creating user" });
     } catch (error) {
       console.log(error);
       res.status(500).json({
@@ -103,7 +111,7 @@ const userController = () => {
   };
 
   return {
-    create,
+    register,
     findAll,
     findOne,
     update,
